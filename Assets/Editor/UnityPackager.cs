@@ -58,7 +58,7 @@ public class UnityPackagerWindow : EditorWindow
 
 	void OnEnable ()
 	{
-		if(!AssetDatabase.IsValidFolder(UnityPackagerSetting.createPath)) {
+		if(!System.IO.File.Exists(UnityPackagerSetting.createPath)) {
 			UnityPackagerSetting.Create();
 		}
 		setting = AssetDatabase.LoadAssetAtPath<UnityPackagerSetting>(UnityPackagerSetting.createPath);
@@ -89,12 +89,19 @@ public class UnityPackagerWindow : EditorWindow
 
 		// TargetPath
 		EditorGUI.LabelField(new Rect(rect.x + 10, posY, 80, OneColumnHeight), "Target Path");
-		current.targetPath = EditorGUI.TextField(new Rect(rect.x + 21 + 80, posY, rect.width - 100, OneColumnHeight), current.targetPath);
+		current.targetPath = EditorGUI.TextField(new Rect(rect.x + 21 + 80, posY, rect.width - 110 - 30, OneColumnHeight), current.targetPath);
+		GUIContent contentOpen = new GUIContent(EditorGUIUtility.FindTexture("project"));
+		if (GUI.Button(new Rect(rect.x + 21 + 80 + rect.width - 100 - 30, posY, 20, 17), contentOpen, EditorStyles.label))
+		{
+			EditorApplication.delayCall += () => {
+				current.targetPath = FileUtil.GetProjectRelativePath(EditorUtility.OpenFolderPanel("Select Target Path.", "", ""));
+			};
+		}
 
 		// PackageName
 		posY += OneColumnHeight;
 		EditorGUI.LabelField(new Rect(rect.x + 10, posY, 80, OneColumnHeight), "Package Name");
-		current.packageName = EditorGUI.TextField(new Rect(rect.x + 21 + 80, posY, rect.width - 100, OneColumnHeight), current.packageName);
+		current.packageName = EditorGUI.TextField(new Rect(rect.x + 21 + 80, posY, rect.width - 110, OneColumnHeight), current.packageName);
 
 		// CreateButton
 		posY += OneColumnHeight;
@@ -123,6 +130,13 @@ public class UnityPackagerWindow : EditorWindow
 		// OutputPath
 		EditorGUILayout.BeginHorizontal(EditorStyles.textArea);
 		setting.outputPath = EditorGUILayout.TextField("Output Path",setting.outputPath);
+		GUIContent contentOpen = new GUIContent(EditorGUIUtility.FindTexture("project"));
+		if (GUILayout.Button(contentOpen, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(17)))
+		{
+			EditorApplication.delayCall += () => {
+				setting.outputPath = FileUtil.GetProjectRelativePath(EditorUtility.OpenFolderPanel("Select Output Path.", "", ""));
+			};
+		}
 		EditorGUILayout.EndHorizontal();
 
 		// Space
